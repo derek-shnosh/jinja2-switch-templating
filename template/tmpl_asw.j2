@@ -1,0 +1,141 @@
+{# Setting DEBUG to '1' will omit the template from output for merge-tests. -#}
+{% set debug = '0' -%}
+{% set tmpl = {'file': 'tmpl_asw.j2',
+               'rev': '1.00'} -%}
+{% set indent = '\n!' ~ ' ' * 23 -%}
+{% set z = '{!UNDEFINED!}' -%}
+!-- Author:   DS
+!-- Template: {{ '%s (rev: %s)'|format(tmpl.file, tmpl.rev) }}
+!
+!-- ****************************************************** STATIC VARS ***** --!
+!
+!-- Static variables parsed from CSV keystore.
+!
+!---- KEYSTORE_ID     > {{ keystore_id }}
+!---- ASSOCIATION     > {{ association }}
+!---- IDARRAY_1       > {{ idarray_1 }}
+!
+!-- Static variables defined within the template.
+!{# {% set VARIABLE = 'VALUE' %}         <<< set | print >>>                    !---- VARIABLE          {{ VARIABLE }}   #}
+{% set tftp_addr = '172.17.251.251' -%}                                         !---- TFTP_ADDR       > {{ tftp_addr }}
+{% set domain = 'domain.lan' -%}                                                !---- DOMAIN          > {{ domain }}
+{% set stp_priority = '61440' -%}                                               !---- STP_PRIORITY    > {{ stp_priority }}
+{% set enable_sec = '3n4b13' -%}                                                !---- ENABLE_SEC      > {{ enable_sec }}
+{% set root_dir = '/var/git/j2-switch-template/template/' -%}                   !---- ROOT_DIR        > {{ root_dir }}
+{% set radius_key = 'r4d1u5' -%}                                                !---- RADIUS_KEY      > {{ radius_key }}
+{% set includes = 'banner.j2',
+                  'interfaces.j2',
+                  'ios-base.j2' -%}                                             !---- [INCLUDES]      > {{ includes|sort }}
+{% set syslog_addr = '10.1.253.201',
+                     '10.1.253.202' -%}                                         !---- [SYSLOG_ADDR]   > {{ syslog_addr|sort }}
+{% set image = {'file': 'c2960x-universalk9-mz.152-4.E8.bin',
+                'ver': '15.2(4)E8'} -%}                                         !---- (IMAGE)         > {{ image|dictsort|join(indent) }}
+{% set vty_acl = {'10': '10.1.10.0 0.0.0.255',
+                  '20': '10.1.253.0 0.0.0.255'} -%}                             !---- (VTY_ACL)       > {{ vty_acl|dictsort|join(indent) }}
+{% set snmp_acl = {'10': '10.1.253.0 0.0.0.255'} -%}                            !---- (SNMP_ACL)      > {{ snmp_acl|dictsort|join(indent) }}
+{% set snmpv3 = {'grp': 'SNMP_ASW',
+                 'user': 'snmp_asw',
+                 'auth': '5nmp4u7h',
+                 'priv': '5nmppr1v'} -%}                                        !---- (SNMPV3)        > {{ snmpv3|dictsort|join(indent) }}
+{% set creds = {'localadmin': 'p455w0rd'} -%}                                   !---- (CREDS)         > {{ creds|dictsort|join(indent) }}
+{% set ntp_addr = {'pri': '10.1.253.11',
+                   'sec': '10.1.253.12'} -%}                                    !---- (NTP_ADDR)      > {{ ntp_addr|dictsort|join(indent) }}
+{% set mgmt = {'net': '10.1.252',
+               'mask': '255.255.255.0'} -%}                                     !---- (MGMT)          > {{ mgmt|dictsort|join(indent) }}
+{% set vlan = {'native': {'id': '999', 'name': 'NATIVE'},
+               'mgmt': {'id': '252', 'name': 'MGMT'}} -%}                       !---- (VLAN)          > {{ vlan|dictsort|join(indent) }}
+!
+!-- ***************************************************** DYNAMIC VARS ***** --!
+!
+!-- Dynamic variables based on static and CSV keystore variables.
+!
+{# Copy HOSTNAME and SW_NUM from KEYSTORE_ID and SERIAL from IDARRAY_1.  -#}
+{% set hostname = keystore_id -%}                                               !---- HOSTNAME        > {{ hostname }}
+{% set sw_num = hostname.split('-')[1] -%}                                      !---- SW_NUM          > {{ sw_num }}
+{% set serial = idarray_1 -%}                                                   !---- SERIAL          > {{ serial }}
+!
+{# Create VLAN.MGMT.IP and VLAN.MGMT.ROUTE from MGMT.NET, MGMT.MASK, and SW. -#}
+{% set x = vlan.mgmt.update({'mask': mgmt.mask,
+                             'ip': '%s.%s'|format(mgmt.net, sw_num),
+                             'route': '%s.1'|format(mgmt.net)}) -%}             !---- (VLAN.MGMT)     > {{ vlan.mgmt|dictsort|join(indent) }}
+!
+{# Create VLAN_LIST from [VLAN]. -#}
+{% set vlan_list=[] -%}
+{% for key, vl in vlan|dictsort -%}
+{%   set vlan_list=vlan_list.append(vl.id or z) -%}
+{% endfor -%}
+{% set vlan_list=vlan_list|sort|join(',') -%}                                   !---- VLAN_LIST       > {{ vlan_list }}
+!
+{% if debug == '0' -%}
+!-- ********************************* CONFIG INCLUDED, DEBUG DISABLED ***** -- !
+!
+hostname {{ hostname or z }}
+ip domain-name {{ domain or z }}
+!
+spanning-tree vlan 1-4094 priority {{ stp_priority or z }}
+!
+enable secret 0 {{ enable_sec or z }}
+!
+{% for cred, secret in creds|dictsort -%}
+username {{ cred or z }} privilege 15 secret 0 {{ secret or z }}
+{% endfor -%}
+!
+{% for key, vl in vlan|dictsort -%}
+vlan {{ vl.id or z }}
+ name {{ vl.name or z }}
+{% endfor -%}
+!
+ip access-list extended VTY
+{% for seq, net in vty_acl|dictsort -%}
+ {{ seq or z }} permit tcp {{ net or z }} any eq 22
+{% endfor -%}
+ 998 deny tcp any any eq 23 log
+ 999 deny tcp any any eq 22 log
+!
+line vty 0 15
+ access-class VTY in
+!
+ip access-list standard SNMP
+{% for seq, net in snmp_acl|dictsort -%}
+ {{ seq or z }} permit {{ net or z }}
+{% endfor -%}
+ 999 deny any
+!
+snmp-server community {{ snmp.comm or z }} {{ snmp.priv or z }} SNMP
+snmp-server group {{ snmpv3.grp or z }} v3 priv
+snmp-server user {{ snmpv3.user or z }} {{ 
+                    snmpv3.grp or z }} v3 auth sha {{ 
+                    snmpv3.auth or z }} priv aes 256 {{ 
+                    snmpv3.priv or z }} access SNMP
+snmp-server contact Provisioned with switch template: {{ '%s (Rev: %s)' | 
+                                                         format(tmpl.file or z, 
+                                                                tmpl.rev or z) }}
+!
+interface Vlan{{ vlan.mgmt.id or z }}
+ description {{ vlan.mgmt.name or z }}
+ no ip redirects
+ no ip proxy-arp
+ ip address {{ vlan.mgmt.ip or z }} {{ vlan.mgmt.mask or z }}
+ no shutdown
+!
+ip default-gateway {{ vlan.mgmt.route or z }}
+!
+ip tftp source-interface Vlan{{ vlan.mgmt.id or z }}
+!
+{% for host in syslog_addr|sort -%}
+logging host {{ host or z }}
+{% endfor -%}
+!
+{% for key, host in ntp_addr|dictsort -%}
+ntp server {{ host or z }}{{ ' prefer' if key == 'pri' }} source Vlan{{ vlan.mgmt.id or z }}
+{% endfor -%}
+!
+!-- V V V V V V V V V V V V V V V V V V V V V V V V V V V V V INCLUDES V V V --!
+!-- V V V V V V V V V V V V V V V V V V V V V V V V V V V V V          V V V --!
+{% for tmpl in includes -%}
+{%   include root_dir ~ tmpl %}
+{% endfor -%}
+end
+{% else -%}
+!-- ********************************** CONFIG OMMITTED, DEBUG ENABLED ***** -- !
+{% endif -%}

@@ -1,0 +1,11 @@
+{% set tmpl = {"file": "interfaces.j2",
+               "rev": "1.00"} -%}
+!-- ******************************************************* INTERFACES ***** --!
+!-- Template: {{ "%s (rev: %s)"|format(tmpl.file, tmpl.rev) }}
+!
+interface GigabitEthernet1/0/48
+ switchport mode access
+ switchport nonegotiate
+ spanning-tree portfast
+ ip dhcp snooping trust
+!

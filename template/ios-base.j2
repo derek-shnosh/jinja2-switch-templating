@@ -1,0 +1,79 @@
+{% set tmpl = {"file": "ios_base.j2",
+               "rev": "1.00"} -%}
+!-- ********************************************************* IOS_BASE ***** --!
+!-- Template: {{ "%s (rev: %s)"|format(tmpl.file, tmpl.rev) }}
+!
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime show-timezone year
+service timestamps log datetime msec localtime show-timezone year
+service password-encryption
+service counters max age 5
+!
+clock timezone PST -8 0
+clock summer-time PDT recurring
+!
+no ip domain lookup
+!
+logging count
+logging buffered 409600 debugging
+logging rate-limit 100
+logging console debug
+!
+crypto key generate rsa modulus 2048
+!
+ip ssh logging events
+ip ssh version 2
+!
+spanning-tree mode rapid-pvst
+spanning-tree loopguard default
+spanning-tree portfast bpdufilter default
+spanning-tree etherchannel guard misconfig
+spanning-tree pathcost method long
+!
+vtp mode transparent
+!
+file prompt quiet
+!
+ip dhcp snooping vlan 1-4094
+no ip dhcp snooping information option
+ip dhcp snooping
+!
+udld aggressive
+!
+errdisable recovery cause all
+!
+mac address-table notification change interval 60
+mac address-table notification change history-size 100
+mac address-table notification change
+mac address-table notification mac-move
+mac address-table aging-time 14400
+!
+alias exec intstat show interf status
+alias exec ipint show ip interf br | e una
+alias exec ver show ver | i Soft|file
+alias exec vlbr show vlan br | i active
+alias exec rundiff show arch config diff
+!
+aaa new-model
+!
+aaa authentication login default local
+aaa authentication login console local
+aaa authorization console
+aaa authorization exec default local if-authenticated
+!
+ip tftp blocksize 8192
+!
+no ip http server
+no ip http secure-server
+!
+line console 0
+ login authentication CONSOLE
+ logging synchronous
+ exec-timeout 15 0
+line vty 0 15
+ logging synchronous
+ exec-timeout 30 0
+ transport input ssh
+ transport preferred none
+!

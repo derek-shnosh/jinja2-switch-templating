@@ -49,14 +49,14 @@
 !
 !-- Dynamic variables based on static and CSV keystore variables.
 !
-{# Copy HOSTNAME and SW_NUM from KEYSTORE_ID and SERIAL from IDARRAY_1.  -#}
+{# Copy HOSTNAME and SW from KEYSTORE_ID and SERIAL from IDARRAY_1.  -#}
 {% set hostname = keystore_id -%}                                               !---- HOSTNAME        > {{ hostname }}
-{% set sw_num = hostname.split('-')[1] -%}                                      !---- SW_NUM          > {{ sw_num }}
+{% set sw = hostname.split('-')[1] -%}                                          !---- SW              > {{ sw }}
 {% set serial = idarray_1 -%}                                                   !---- SERIAL          > {{ serial }}
 !
 {# Create VLAN.MGMT.IP and VLAN.MGMT.ROUTE from MGMT.NET, MGMT.MASK, and SW. -#}
 {% set x = vlan.mgmt.update({'mask': mgmt.mask,
-                             'ip': '%s.%s'|format(mgmt.net, sw_num),
+                             'ip': '%s.%s'|format(mgmt.net, sw),
                              'route': '%s.1'|format(mgmt.net)}) -%}             !---- (VLAN.MGMT)     > {{ vlan.mgmt|dictsort|join(indent) }}
 !
 {# Create VLAN_LIST from [VLAN]. -#}

@@ -121,6 +121,7 @@ interface Vlan{{ vlan.mgmt.id or z }}
 ip default-gateway {{ vlan.mgmt.route or z }}
 !
 ip tftp source-interface Vlan{{ vlan.mgmt.id or z }}
+logging source-interface Vlan{{ vlan.mgmt.id or z }}
 !
 {% for host in syslog_addr|sort -%}
 logging host {{ host or z }}
@@ -133,7 +134,7 @@ ntp server {{ host or z }}{{ ' prefer' if key == 'pri' }} source Vlan{{ vlan.mgm
 !-- V V V V V V V V V V V V V V V V V V V V V V V V V V V V V INCLUDES V V V --!
 !-- V V V V V V V V V V V V V V V V V V V V V V V V V V V V V          V V V --!
 {% for tmpl in includes -%}
-{%   include root_dir ~ tmpl %}
+{%  include root_dir ~ tmpl %}
 {% endfor -%}
 end
 {% else -%}

@@ -1,6 +1,6 @@
-# J2 Switch Templates
+# Jinja2 Switch Templating
 
-> [FreeZTP][gh-freeztp] (ver: 1.3.1) was used to provision access switches.
+> [FreeZTP][gh-freeztp] (ver: 1.5.1) was used to validate templates.
 
 Template files that accompany my [Jinja2 Switch Templating][blog-post] blog post.
 

@@ -1,7 +1,7 @@
 {# Setting DEBUG to '1' will omit the template from output for merge-tests. -#}
 {% set debug = '0' -%}
 {% set tmpl = {'file': 'tmpl_asw.j2',
-               'rev': '1.00'} -%}
+               'rev': '20210906.1'} -%}
 {% set indent = '\n!' ~ ' ' * 23 -%}
 {% set z = '{!UNDEFINED!}' -%}
 !-- Author:   DS
@@ -21,7 +21,7 @@
 {% set domain = 'domain.lan' -%}                                                !---- DOMAIN          > {{ domain }}
 {% set stp_priority = '61440' -%}                                               !---- STP_PRIORITY    > {{ stp_priority }}
 {% set enable_sec = '3n4b13' -%}                                                !---- ENABLE_SEC      > {{ enable_sec }}
-{% set root_dir = '/var/git/j2-switch-template/template/' -%}                   !---- ROOT_DIR        > {{ root_dir }}
+{% set root_dir = '/var/git/jinja2-switch-templating/template/' -%}             !---- ROOT_DIR        > {{ root_dir }}
 {% set radius_key = 'r4d1u5' -%}                                                !---- RADIUS_KEY      > {{ radius_key }}
 {% set includes = 'banner.j2',
                   'interfaces.j2',
@@ -33,6 +33,8 @@
 {% set vty_acl = {'10': '10.1.10.0 0.0.0.255',
                   '20': '10.1.253.0 0.0.0.255'} -%}                             !---- (VTY_ACL)       > {{ vty_acl|dictsort|join(indent) }}
 {% set snmp_acl = {'10': '10.1.253.0 0.0.0.255'} -%}                            !---- (SNMP_ACL)      > {{ snmp_acl|dictsort|join(indent) }}
+{% set snmp = {'comm': 'ESENEMPEE',
+               'priv': 'ro'} -%}                                                !---- (SNMP)          > {{ snmp|dictsort|join(indent) }}
 {% set snmpv3 = {'grp': 'SNMP_ASW',
                  'user': 'snmp_asw',
                  'auth': '5nmp4u7h',
@@ -132,8 +134,8 @@ ntp server {{ host or z }}{{ ' prefer' if key == 'pri' }} source Vlan{{ vlan.mgm
 {% endfor -%}
 !
 !-- V V V V V V V V V V V V V V V V V V V V V V V V V V V V V INCLUDES V V V --!
-!-- V V V V V V V V V V V V V V V V V V V V V V V V V V V V V          V V V --!
 {% for tmpl in includes -%}
+!-- V V V V V V V V V V V V V V V V V V V V V V V V V V V V V {{ tmpl }}
 {%  include root_dir ~ tmpl %}
 {% endfor -%}
 end

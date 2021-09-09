@@ -68,7 +68,7 @@
 {% endfor -%}
 {% set vlan_list=vlan_list|sort|join(',') -%}                                   !---- VLAN_LIST       > {{ vlan_list }}
 !
-{% if debug == '0' -%}
+{% if debug != '1' -%}
 !-- ********************************* CONFIG INCLUDED, DEBUG DISABLED ***** -- !
 !
 hostname {{ hostname or z }}

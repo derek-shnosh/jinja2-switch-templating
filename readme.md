@@ -10,4 +10,4 @@ Template files that accompany my [Jinja2 Switch Templating][blog-post] blog post
 | **template** | Jinja2 template files for FreeZTP.                              |
 
 [gh-freeztp]: https://github.com/PackeTsar/freeztp/
-[blog-post]: https://shnosh.io/jinja2-switch-templating
+[blog-post]: https://shnosh.io/revisiting-jinja2-switch-templating/

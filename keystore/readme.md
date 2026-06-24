@@ -1,5 +1,5 @@
 # Keystore Files
 
-| Keystore  | Description             |
-| --------- | ----------------------- |
-| ks_asw.j2 | Access switch keystore. |
+| Keystore   | Description             |
+| ---------- | ----------------------- |
+| ks_asw.csv | Access switch keystore. |
